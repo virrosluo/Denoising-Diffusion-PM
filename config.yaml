@@ -1,0 +1,43 @@
+diffusion_params:
+  num_timesteps: 1000
+  beta_start: 0.02
+  beta_end: 0.0001
+  
+dataset_params:
+  dataset_path: "./storage/dataset"
+  train_valid_ratio: 
+    - 0.9
+    - 0.1
+  train_batch: 100
+  valid_batch: 300
+  test_batch: 300
+  num_worker: 2
+
+model_params:
+  down_channels: 
+    - 32
+    - 64
+    - 128
+  down_sampling_options: 
+    - True
+    - True
+  mid_channels: 
+    - 128
+    - 128
+    - 128
+  time_embedding_dim: 128
+  attention_heads: 4
+
+train_params:
+  training_process_log: "./storage/train"
+  precision: "32-true"
+  lr: 0.001
+  num_epochs: 1
+  run_valid_step_after: 0.1
+  use_deepspeed: False
+
+deepspeed_config:
+  deepspeed_stage: 3
+  offload_optimizer: True
+  offload_parameters: True
+  offload_params_device: "cpu"
