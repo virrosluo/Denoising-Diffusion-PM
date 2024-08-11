@@ -25,8 +25,8 @@ class LinearNoiseScheduler:
         original_shape = origin.shape
         batch_size = original_shape[0]
 
-        sqrt_alpha_cum_prod = self.sqrt_alpha_cum_prod[t].to(origin.device)
-        sqrt_one_minus_alpha_cum_prod = self.sqrt_one_minus_alpha_cum_prod[t].to(origin.device)
+        sqrt_alpha_cum_prod = self.sqrt_alpha_cum_prod.to(origin.device)[t]
+        sqrt_one_minus_alpha_cum_prod = self.sqrt_one_minus_alpha_cum_prod.to(origin.device)[t]
 
         for _ in range(len(original_shape) - 1):
             sqrt_alpha_cum_prod = sqrt_alpha_cum_prod.unsqueeze(-1)
@@ -41,14 +41,14 @@ class LinearNoiseScheduler:
         t: torch.Tensor
     ):
         '''Get image x0 from the noise predicted and noisy image xt at timestep t'''
-        sqrt_one_minus_alpha_cum_prod = self.sqrt_one_minus_alpha_cum_prod[t].to(xt.device)
-        sqrt_alpha_cum_prod = self.sqrt_alpha_cum_prod[t].to(xt.device)
+        sqrt_one_minus_alpha_cum_prod = self.sqrt_one_minus_alpha_cum_prod.to(xt.device)[t]
+        sqrt_alpha_cum_prod = self.sqrt_alpha_cum_prod.to(xt.device)[t]
 
         x0 = (xt - sqrt_one_minus_alpha_cum_prod * noise_pred) / sqrt_alpha_cum_prod
         x0 = torch.clamp(x0, min=-1., max=1.0)
 
-        alphas = self.alphas[t].to(xt.device)
-        betas = self.betas[t].to(xt.device)
+        alphas = self.alphas.to(xt.device)[t]
+        betas = self.betas.to(xt.device)[t]
 
         mean_sampling = xt - ((betas * noise_pred) / sqrt_one_minus_alpha_cum_prod)
         mean_sampling = mean_sampling / torch.sqrt(alphas)
@@ -56,7 +56,7 @@ class LinearNoiseScheduler:
         if t == 0:
             return mean_sampling, x0
         else:
-            variance = sqrt_alpha_cum_prod * (1. - self.alpha_cum_prod[t - 1].to(xt.device)) / (1. - self.alpha_cum_prod[t].to(xt.device))
+            variance = sqrt_alpha_cum_prod * (1. - self.alpha_cum_prod.to(xt.device)[t - 1]) / (1. - self.alpha_cum_prod.to(xt.device)[t])
             sigma = variance ** 0.5
             z = torch.randn_like(xt, device=xt.device, dtype=xt.dtype)
 
