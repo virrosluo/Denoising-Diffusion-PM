@@ -37,6 +37,10 @@ class TrainingConfig():
         default=True
     )
 
+    reports_to: str = field(
+        default="tensorboard"
+    )
+
 class Diffusion_LightningModel(lightning.LightningModule):
     def __init__(
         self,
@@ -87,8 +91,7 @@ class Diffusion_LightningModel(lightning.LightningModule):
         return {"test_loss": loss}
 
     def configure_optimizers(self):
-        return optim.AdamW(
+        return optim.Adam(
             params=self.model.parameters(), 
             lr=self.config.lr, 
         )
-

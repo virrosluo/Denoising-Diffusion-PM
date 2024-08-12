@@ -32,12 +32,13 @@ train_params:
   training_process_log: "./storage/train"
   precision: "32-true"
   lr: 0.001
-  num_epochs: 1
-  run_valid_step_after: 0.1
+  num_epochs: 10000
+  run_valid_step_after: 0.5
   use_deepspeed: False
+  reports_to: "wan_db"
 
 deepspeed_config:
-  deepspeed_stage: 3
+  stage: 3
   offload_optimizer: True
   offload_parameters: True
   offload_params_device: "cpu"

@@ -5,13 +5,15 @@ from lightning_model import Diffusion_LightningModel
 
 import torch
 import torchvision
+import wandb
 
 class ImageLoggingCallback(Callback):
-    def __init__(self, image_shape, num_samples, num_timestep):
+    def __init__(self, image_shape, num_samples, num_timestep, logger_type: str):
         super().__init__()
         self.batch_shape = tuple([num_samples] + list(image_shape))
         self.log_samples = num_samples
         self.num_timestep = num_timestep
+        self.logger_type = logger_type
 
     @torch.inference_mode
     def on_train_epoch_start(self, trainer: Trainer, pl_module: Diffusion_LightningModel) -> None:
@@ -41,4 +43,8 @@ class ImageLoggingCallback(Callback):
             tensor=imgs,
             nrow=2
         )
-        pl_module.logger.experiment.add_image("image revision", grid, trainer.global_step)
+
+        if self.logger_type == "tensorboard":
+            pl_module.logger.experiment.add_image("image revision", grid, trainer.global_step)
+        elif self.logger_type == "wan_db":
+            pl_module.logger.experiment.log({"generated_images": [wandb.Image(grid, caption=trainer.global_step)]})

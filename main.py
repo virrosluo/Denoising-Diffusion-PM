@@ -6,7 +6,7 @@ from utils import ImageLoggingCallback
 
 from lightning.pytorch.profilers import PyTorchProfiler
 from lightning.pytorch.callbacks import DeviceStatsMonitor
-from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from lightning.pytorch.strategies import DeepSpeedStrategy
 
 import lightning
@@ -76,7 +76,15 @@ if __name__ == "__main__":
     )
 
 # --------------------------------- Logger INIT
-    logger = TensorBoardLogger(save_dir=train_config.training_process_log)
+    if train_config.reports_to == "wan_db":
+        logger = WandbLogger(
+            name="lightning_logs", 
+            save_dir=train_config.training_process_log, 
+            project="Denoising Diffusion Probabilistic Model",
+            log_model=True
+        )
+    elif train_config.reports_to == "tensorboard":
+        logger = TensorBoardLogger(save_dir=train_config.training_process_log)
 
 # --------------------------------- Profiler INIT
     log.info("INITIALIZING PROFILER")
@@ -91,7 +99,7 @@ if __name__ == "__main__":
 
 # --------------------------------- Callback INIT
     log.info("INITIALIZING CALLBACK FUNCTION")
-    imgs_log_callback = ImageLoggingCallback(image_shape=list(dataset.get_image_shape()), num_samples=5, num_timestep=diffusion_config.num_timesteps)
+    imgs_log_callback = ImageLoggingCallback(image_shape=list(dataset.get_image_shape()), num_samples=5, num_timestep=diffusion_config.num_timesteps, logger_type=train_config.reports_to)
     device_usage_callback = DeviceStatsMonitor()
 
 # --------------------------------- DeepSpeed INIT
